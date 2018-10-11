@@ -1,0 +1,22 @@
+{
+  "name": "token",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "nodemon -e js,sol --exec truffle test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "js-sha3": "^0.8.0",
+    "truffle-hdwallet-provider": "0.0.5",
+    "web3": "^1.0.0-beta.36",
+    "web3-provider-engine": "^14.0.6",
+    "zeppelin-solidity": "1.8.0"
+  }
+}
