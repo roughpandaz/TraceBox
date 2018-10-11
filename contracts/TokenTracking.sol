@@ -10,8 +10,6 @@ contract TokenTracking {
   struct Property {
     string url;
     string name;
-    // string tokenName;
-    // string partID;
   }
 
   mapping (bytes32 => Property) properties;
@@ -20,9 +18,17 @@ contract TokenTracking {
     owner = msg.sender;
   }
 
+  modifier onlyOwner {
+    require(msg.sender == owner, "Must be owner");
+    _;
+  }
+
   function createFile(string url, string name) public returns(bytes32){
     // Create hash
     bytes32 key = keccak256(abi.encodePacked(name));
+
+    require(bytes(url).length > 0, "url cannot be empty");
+    require(bytes(properties[key].url).length == 0, "property already exists");
 
     properties[key].url = url;
     properties[key].name = name;

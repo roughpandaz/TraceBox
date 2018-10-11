@@ -4,7 +4,12 @@ var jsSha3 = require("js-sha3");
 const testData = {
   file1: {
     url: "www.longurl.com/1231231",
-    name: "name",
+    name: "name1",
+    fileID: ""
+  },
+  file2: {
+    url: "www.longurl.com/1231231",
+    name: "name2",
     fileID: ""
   }
 }
@@ -22,9 +27,9 @@ contract('TokenTracking contract', async () => {
 
   it("should create the correct hash", async () => {
     let instance = await TokenTracking.deployed();
-    let transaction = await instance.createFile.call(testData.file1.url,testData.file1.name);
+    let transaction = await instance.createFile.call(testData.file2.url,testData.file2.name);
 
-    let expect = toBytes(jsSha3.keccak256(testData.file1.name));
+    let expect = toBytes(jsSha3.keccak256(testData.file2.name));
   
     assert.equal(transaction.valueOf(), expect);
   })
