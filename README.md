@@ -4,7 +4,12 @@ Decentralized tool that allows users to store files on IPFS and to store a tampe
 
 ## Development
 
+
 ```sh
+
+# Run ganache-cli in separate terminal
+npm run ganache
+
 # Using nodemon to continuously test contracts
 npm run dev
 ```
