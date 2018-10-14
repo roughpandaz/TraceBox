@@ -3,18 +3,9 @@ import SimpleStorageContract from "./contracts/TokenTracking.json";
 import getWeb3 from "./utils/getWeb3";
 import truffleContract from "truffle-contract";
 
+import Upload from "./Upload";
+
 import "./App.css";
-
-// class Form extends Component{
-//   constructor(props){
-//     super(props);
-//     this.state = {value: ''};
-
-//     this.handleChange = this.handleChange.bind(this);
-//     this.handleSubmit = this.handleSubmit.bind(this);
-//   }
-
-// }
 
 class App extends Component {
 
@@ -83,7 +74,6 @@ class App extends Component {
     alert('A name was submitted: ' + this.state.value);
 
     this.runExample(this.state.value);
-    
   }
 
   render() {
@@ -94,7 +84,9 @@ class App extends Component {
       <div className="App">
         <h1>Add a file</h1>
 
-        <form onSubmit={this.handleSubmit}>
+        <Upload />
+
+        {/* <form onSubmit={this.handleSubmit}>
           <label>
             Name:
             <input type="text" value={this.state.value} onChange={this.handleChange} />
@@ -102,7 +94,7 @@ class App extends Component {
           <input type="submit" value="Submit" />
         </form> 
 
-      <div>Url of file: {this.state.storageValue}</div>
+      <div>Url of file: {this.state.storageValue}</div> */}
 
       </div>
     );
