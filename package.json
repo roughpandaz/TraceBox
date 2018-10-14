@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "nodemon -e js,sol --exec truffle test",
+    "devDeploy": "truffle compile && truffle migrate --reset",
     "ganache": "ganache-cli"
   },
   "keywords": [],
