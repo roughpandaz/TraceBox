@@ -3,7 +3,7 @@ import SimpleStorageContract from "./contracts/TokenTracking.json";
 import getWeb3 from "./utils/getWeb3";
 import truffleContract from "truffle-contract";
 
-import Upload from "./Upload";
+// import Upload from "./Upload";
 
 import "./App.css";
 
@@ -12,10 +12,20 @@ class App extends Component {
   constructor(){
     super();
 
-    this.state = { storageValue: 0, web3: null, accounts: null, contract: null, value: '' };
+    this.state = { storageValue: 0, web3: null, accounts: null, contract: null, value: '', imageURL: '', ethVal: ''};
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    const ipfsScript = document.createElement("script");
+    ipfsScript.src = "https://unpkg.com/ipfs-api/dist/index.js";
+    ipfsScript.async = true;
+
+    ipfsScript.addEventListener('load', function () {
+      window.ipfs = window.IpfsApi('ipfs.infura.io', '5001', {protocol: 'https'})
+      console.log("COMPLETED");
+    });
+  
+    document.body.appendChild(ipfsScript);
+    
+    this.handleUploadImage = this.handleUploadImage.bind(this);
   }
 
   componentDidMount = async () => {
@@ -41,61 +51,73 @@ class App extends Component {
         );
       console.log(error);
     }
-
-  
   };
   
-  runExample = async (val) => {
-    console.log("BOB");
-    
-    const { accounts, contract } = this.state;
-    console.log(contract);
-    
-    // Stores a given value, 5 by default.
-    var response1 = await contract.createFile.sendTransaction(val, val, { from: accounts[0] });
-    console.log("OK", response1);
-    
-    // Get the value from the contract to prove it worked.
-    var response = await contract.getFile(val, { from: accounts[0] });
-    console.log("BOB", response);
-    
-    // Update state with the result.
-    this.setState({ storageValue: response });
+  captureFile =(event) => {
+    event.stopPropagation()
+    event.preventDefault()
+    const file = event.target.files[0]
+    let reader = new window.FileReader()
+
+    reader.readAsArrayBuffer(file)
+    reader.onloadend = () => this.convertToBuffer(reader)
   };
 
-  handleChange(event) {
-    
-    this.setState({value: event.target.value});
+  captureFileName = (event) =>{
+    this.setState({fileName: event.target.value});
   }
 
-  handleSubmit(event) {
+  //Convert the file to buffer to store on IPFS
+  convertToBuffer = async(reader) => {
+      //file is converted to a buffer for upload to IPFS
+      const buffer = await Buffer.from(reader.result);
+      //set this buffer-using es6 syntax
+      this.setState({buffer});
+  };
+
+  handleUploadImage = async (event) => {
     event.preventDefault();
-    
-    alert('A name was submitted: ' + this.state.value);
+    this.setState({imageURL: "uploading file..."})
+    //save document to IPFS,return its hash#, and set hash# to state
+    await window.ipfs.files.add(this.state.buffer, async (err, res) => {
+      var ipfsHash = res[0].hash
+      this.setState({imageURL: ipfsHash})
 
-    this.runExample(this.state.value);
-  }
+      var val = this.state.fileName
+      console.log("VLA", val);
+      
+      const { accounts, contract } = this.state;
+      
+      // Stores a given value, 5 by default.
+      var txVal = await contract.createFile.sendTransaction(ipfsHash, val, { from: accounts[0] });
+      console.log("OK", txVal);
+
+      // // Get the value from the contract to prove it worked.
+      var response = await contract.getFile(val, { from: accounts[0] });
+      console.log("BOB", response);
+      // Update state with the result.
+      this.setState({ethVal: response });
+      console.log(err,res);
+    })
+  };
 
   render() {
-    if (!this.state.web3) {
-      return <div>Loading Web3, accounts, and contract...</div>;
-    }
     return (
       <div className="App">
         <h1>Add a file</h1>
-
-        <Upload />
-
-        {/* <form onSubmit={this.handleSubmit}>
-          <label>
-            Name:
-            <input type="text" value={this.state.value} onChange={this.handleChange} />
-          </label>
-          <input type="submit" value="Submit" />
-        </form> 
-
-      <div>Url of file: {this.state.storageValue}</div> */}
-
+        <form onSubmit={this.handleUploadImage}>
+          <div>
+            <input type="file" onChange = {this.captureFile} />
+          </div>
+          <div>
+            <input type="text" placeholder="Enter the desired name of file" onChange = {this.captureFileName}/>
+          </div>
+          <div>
+            <button>Upload</button>
+          </div>
+          <p> {this.state.imageURL} </p>
+          <p> {this.state.ethVal} </p>
+        </form>
       </div>
     );
   }
