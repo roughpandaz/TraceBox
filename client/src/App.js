@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import Button from '@material-ui/core/Button';
+import Input from '@material-ui/core/Input';
+
 import SimpleStorageContract from "./contracts/TokenTracking.json";
 import getWeb3 from "./utils/getWeb3";
 import truffleContract from "truffle-contract";
@@ -12,7 +15,16 @@ class App extends Component {
   constructor(){
     super();
 
-    this.state = { storageValue: 0, web3: null, accounts: null, contract: null, value: '', imageURL: '', ethVal: ''};
+    this.state = {
+      storageValue: 0,
+      web3: null,
+      accounts: null, 
+      contract: null, 
+      value: '', 
+      imageURL: '', 
+      ethVal: '',
+      showResults: false
+    };
 
     const ipfsScript = document.createElement("script");
     ipfsScript.src = "https://unpkg.com/ipfs-api/dist/index.js";
@@ -44,6 +56,8 @@ class App extends Component {
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
       this.setState({ web3, accounts, contract: instance });
+
+    console.log("BOB", this.state.showResults);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -77,50 +91,87 @@ class App extends Component {
 
   handleUploadImage = async (event) => {
     event.preventDefault();
-    this.setState({imageURL: "uploading file..."})
+
     //save document to IPFS,return its hash#, and set hash# to state
     await window.ipfs.files.add(this.state.buffer, async (err, res) => {
+      const { accounts, contract } = this.state;
+
+      if (err){
+        this.setState({imageURL: "Issue uploading IPFS HASH"});
+        console.error(err);
+        return;
+      }
+
+      this.setState({showResults: true})
+      // Set IPFS hash
       var ipfsHash = res[0].hash
       this.setState({imageURL: ipfsHash})
 
-      var val = this.state.fileName
-      console.log("VLA", val);
-      
-      const { accounts, contract } = this.state;
+      var fileName = this.state.fileName
       
       // Stores a given value, 5 by default.
-      var txVal = await contract.createFile.sendTransaction(ipfsHash, val, { from: accounts[0] });
-      console.log("OK", txVal);
-
-      // // Get the value from the contract to prove it worked.
-      var response = await contract.getFile(val, { from: accounts[0] });
-      console.log("BOB", response);
+      var response = await contract.createFile.sendTransaction(ipfsHash, fileName, { from: accounts[0] });
+      console.log(response.tx)
       // Update state with the result.
-      this.setState({ethVal: response });
-      console.log(err,res);
+      this.setState({ethVal: response.tx });
     })
   };
 
   render() {
+    let results = <div id="results">
+                    <p class="heading">File Hash:</p>
+                    <p> {this.state.imageURL} </p>
+                    <p class="heading"> Transaction ID: </p>
+                    <p> {this.state.ethVal} </p>
+                  </div>
+    let upload = <form>
+              <div>
+                <Button
+                  id="file-upload"
+                  // fullWidth="true"
+                  variant="flat">
+                  <span><i class="icon-attachment"></i>Upload File</span>
+                  <input type="file" onChange={this.captureFile}/>
+                </Button>
+              </div>
+              <Input
+                id="file-name-input"
+                placeholder="File Id"
+                onChange = {this.captureFileName}>
+              </Input>
+              <Button
+                id="upload-button"
+                variant="raised"
+                color="primary"
+                fullWidth
+                onClick={this.handleUploadImage}>
+                Upload
+              </Button>
+        </form>
+
+    if (!this.state.showResults){
+      results = null;
+      // upload = upload;
+    } else {
+      // upload = null;
+    }
+
     return (
       <div className="App">
-        <h1>Add a file</h1>
-        <form onSubmit={this.handleUploadImage}>
-          <div>
-            <input type="file" onChange = {this.captureFile} />
-          </div>
-          <div>
-            <input type="text" placeholder="Enter the desired name of file" onChange = {this.captureFileName}/>
-          </div>
-          <div>
-            <button>Upload</button>
-          </div>
-          <p> {this.state.imageURL} </p>
-          <p> {this.state.ethVal} </p>
-        </form>
+        <div class="wrapper">
+           {upload}
+        </div>
+        {results}
       </div>
     );
   }
 }
+
+// class Results extends Component {
+//   render(){
+//     return(
+//     )
+//   }
+// }
 
 export default App;
