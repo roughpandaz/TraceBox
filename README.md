@@ -2,7 +2,7 @@
 
 Decentralized tool that allows users to store files on IPFS and to store a tamper proof reference on the Thunder Blockchain.
 
-[Demo](!https://user-images.githubusercontent.com/3782456/46991611-b3069f80-d0d4-11e8-9029-be32ff234b4c.png)
+![Demo](https://user-images.githubusercontent.com/3782456/46991611-b3069f80-d0d4-11e8-9029-be32ff234b4c.png)
 This is what the completed transaction flow looks like
 
 ## Development
